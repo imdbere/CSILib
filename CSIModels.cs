@@ -11,15 +11,15 @@ namespace CSITool
 
         public UInt16 CSIDataLength;
         public UInt16 Channel;
-        public byte ChannelBandwidth;
-
-        public byte TransmissionRate;
-        public byte NumReceivingAntennas;
-        public byte NumTransmittingAntennas;
-        public byte NumSubcarriers;
+        public PHYErrorCode PhyError;
 
         public byte NoiseFloor;
-        public PHYErrorCode PhyError;
+        public byte TransmissionRate;
+        public byte ChannelBandwidth;
+        public byte NumSubcarriers;
+
+        public byte NumReceivingAntennas;
+        public byte NumTransmittingAntennas;
 
         public byte RxRSSIAll;
         public byte RxRSSIChain0;

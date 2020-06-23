@@ -14,9 +14,16 @@ namespace CSITool
             Console.WriteLine("Hello World!");
 
             var fileStream = File.Open("/dev/CSI_dev", FileMode.Open, FileAccess.Read);
-            var packet = ReadCSIPacket(fileStream);
-            
-            /*var numLines = 0;
+            while (true)
+            {
+                var packet = ReadCSIPacket(fileStream);
+                
+                if (packet != null)
+                {
+                    Console.WriteLine($"Got CSI packet, {packet.StatusPacket.NumReceivingAntennas} RX, {packet.StatusPacket.NumTransmittingAntennas} TX, {packet.StatusPacket.NumSubcarriers} Subcarriers");
+                }
+            }
+                        /*var numLines = 0;
             while (!fileStream.EndOfStream)
             {
                 var nextLine = await fileStream.ReadLineAsync();
@@ -36,14 +43,13 @@ namespace CSITool
         {
             var buffer = new byte[CSIBufferSize];
             var bytesRead = file.Read(buffer, 0, CSIBufferSize);
-            if (bytesRead < CSIBufferSize)
+            if (bytesRead <= 0) //(bytesRead < CSIBufferSize)
             {
                 Console.WriteLine("Not enough bytes read: " + bytesRead);
                 return null;
             }
 
             var span = new Span<byte>(buffer);
-
             var csiPacket = new CSIPacket();
 
             int csiPacketLength = Marshal.SizeOf(typeof(CSIStatusPacket));
@@ -77,8 +83,8 @@ namespace CSITool
         {
             var matrix = new Complex[numRx, numTx, numSubcarriers];
             int currentByte = 0;
-            short currentData = 0;
-            int bitsLeft = 0;
+            uint currentData = 0;
+            byte bitsLeft = 0;
 
             for (int sub = 0; sub < numSubcarriers; sub++)
             {
@@ -90,16 +96,19 @@ namespace CSITool
 
                         for (int i = 0; i < 2; i++)
                         {
-                            if((bitsLeft - 10) < 0) {
-                                currentData = BitConverter.ToInt16(buffer.Slice(currentByte));
+                            if(bitsLeft < 10) {
+                                ushort nextData = buffer[currentByte++];
+                                nextData += (ushort) (buffer[currentByte++] << 8);
+
+                                currentData += (uint)(nextData << bitsLeft);
                                 bitsLeft += 16;
                             }
 
-                            short current10BitNr = (short)(currentData & ((1 << 10) - 1));
+                            ushort current10BitNr = (ushort)(currentData & ((1 << 10) - 1));
                             number[i] = convertNegative(current10BitNr, 10);
 
                             bitsLeft -= 10;
-                            currentData = (short) (currentData >> 10);
+                            currentData = currentData >> 10;
                         }
 
                         matrix[rx, tx, sub] = new Complex(number[1], number[0]);
