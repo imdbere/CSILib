@@ -20,7 +20,23 @@ namespace CSITool
                 
                 if (packet != null)
                 {
-                    Console.WriteLine($"Got CSI packet, {packet.StatusPacket.NumReceivingAntennas} RX, {packet.StatusPacket.NumTransmittingAntennas} TX, {packet.StatusPacket.NumSubcarriers} Subcarriers, First CSI Value: {packet.CSIMatrix[0, 0, 0]}");
+                    var mat = packet.CSIMatrix;
+                    var subcarrier = 10;
+                    var csiString = "";
+                    /*for (int r = 0; r < packet.StatusPacket.NumReceivingAntennas; r++)
+                    {
+                        for (int t = 0; t < packet.StatusPacket.NumTransmittingAntennas; t++)
+                        {
+                            csiString += $"{t}->{r}: {mat[r, t, subcarrier]},";
+                        }
+                    }*/
+
+                    for (int s = 0; s < packet.StatusPacket.NumSubcarriers; s++)
+                    {
+                        csiString += mat[0, 0, s] + ", ";
+                    }
+                    //Console.WriteLine($"TransmissionRate: {packet.StatusPacket.TransmissionRate}, RSSI: {packet.StatusPacket.RxRSSIAll}");
+                    Console.WriteLine($"Got CSI packet, {packet.StatusPacket.NumReceivingAntennas} RX, {packet.StatusPacket.NumTransmittingAntennas} TX, {packet.StatusPacket.NumSubcarriers} Subcarriers, {csiString}");
                 }
             }
                         /*var numLines = 0;
@@ -59,11 +75,16 @@ namespace CSITool
             var statusPacket = (CSIStatusPacket) Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(CSIStatusPacket));
             csiPacket.StatusPacket = statusPacket;
 
+            if (statusPacket.NumReceivingAntennas == 0 || statusPacket.NumTransmittingAntennas == 0) {
+                Console.WriteLine("Num transmitting or receiving antennas is 0, skipping packet");
+                return null;
+            }
             var matrixSlice = span.Slice(csiPacketLength);
             csiPacket.CSIMatrix = ReadCSIMatrix(matrixSlice, statusPacket.NumReceivingAntennas, statusPacket.NumTransmittingAntennas, statusPacket.NumSubcarriers);
 
             //var copyStartIndex = csiPacketLength + csiDataLength;
             var payloadSlice = matrixSlice.Slice(statusPacket.CSIDataLength, statusPacket.PayloadLength);
+            csiPacket.PayloadData = new byte[statusPacket.PayloadLength];
             payloadSlice.CopyTo(csiPacket.PayloadData);
             //Array.Copy(buffer, copyStartIndex, csiPayload.Data, 0, payloadLength); 
 
