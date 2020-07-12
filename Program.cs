@@ -20,7 +20,7 @@ namespace CSITool
                 
                 if (packet != null)
                 {
-                    Console.WriteLine($"Got CSI packet, {packet.StatusPacket.NumReceivingAntennas} RX, {packet.StatusPacket.NumTransmittingAntennas} TX, {packet.StatusPacket.NumSubcarriers} Subcarriers");
+                    Console.WriteLine($"Got CSI packet, {packet.StatusPacket.NumReceivingAntennas} RX, {packet.StatusPacket.NumTransmittingAntennas} TX, {packet.StatusPacket.NumSubcarriers} Subcarriers, First CSI Value: {packet.CSIMatrix[0, 0, 0]}");
                 }
             }
                         /*var numLines = 0;
@@ -45,7 +45,7 @@ namespace CSITool
             var bytesRead = file.Read(buffer, 0, CSIBufferSize);
             if (bytesRead <= 0) //(bytesRead < CSIBufferSize)
             {
-                Console.WriteLine("Not enough bytes read: " + bytesRead);
+                Console.WriteLine("No bytes read");
                 return null;
             }
 
