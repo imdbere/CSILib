@@ -2,20 +2,23 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace CSITool
+namespace CSIUserTool
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CSIStatusPacket
     {
         public UInt64 TimeStamp;
 
-        public UInt16 CSIDataLength;
+        public UInt16 CSIDataLength;    
         public UInt16 Channel;
+
+        // Should be 0
         public PHYErrorCode PhyError;
 
-        public byte NoiseFloor;
+        // Currently always 0
+        private byte NoiseFloor;
         public byte TransmissionRate;
-        public byte ChannelBandwidth;
+        public Bandwidth ChannelBandwidth;
         public byte NumSubcarriers;
 
         public byte NumReceivingAntennas;
@@ -57,5 +60,11 @@ namespace CSITool
         RadarDetect = 5,
         IllegalService = 6,
         TransmitOverrideReceive = 7
+    }
+
+    public enum Bandwidth : byte
+    {
+        MHz_20 = 0,
+        MHz_40 = 1
     }
 }
