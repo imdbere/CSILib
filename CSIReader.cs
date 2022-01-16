@@ -4,19 +4,21 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace CSIUserTool
+namespace CSILib
 {
     public class CSIReader
     {
-        const int CSIBufferSize = 4096;
-        Thread ReadThread;
-        CancellationTokenSource ThreadCancellation = new CancellationTokenSource();
+        private readonly int CSIBufferSize;
+        private readonly string CSIDev;
+        private Thread ReadThread;
+        private CancellationTokenSource ThreadCancellation = new CancellationTokenSource();
         public event EventHandler<CSIPacket> OnNewPacket;
 
         object Locker = new object();
-        public CSIReader()
+        public CSIReader(string csiDev, int csiBufferSize)
         {
-
+            CSIDev = csiDev;
+            CSIBufferSize = csiBufferSize;
         }
 
         public void StartReading()
@@ -36,7 +38,7 @@ namespace CSIUserTool
         }
         void Read()
         {
-            var fileStream = File.Open("/dev/CSI_dev", FileMode.Open, FileAccess.Read);
+            var fileStream = File.Open(CSIDev, FileMode.Open, FileAccess.Read);
 
             while(!ThreadCancellation.IsCancellationRequested)
             {

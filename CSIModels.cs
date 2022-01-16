@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace CSIUserTool
+namespace CSILib
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct CSIStatusPacket
